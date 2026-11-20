@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => ({
     target: "esnext",
     outDir: "dist/modules",
     lib: {
-      entry: "src/module.tsx",
+      entry: "src/fragment.client.tsx",
       name: "DashboardModule",
       formats: ["iife"],
       fileName: () => "dashboard.js",
