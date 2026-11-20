@@ -180,3 +180,11 @@ export function studentUpdatedEvent(student) {
     type: "STUDENT_UPDATED",
   };
 }
+
+/** Server-rendered fragments are visible before they are interactive; wait for hydration. */
+export async function waitForRemoteReady(page, remoteName) {
+  await page.waitForFunction(
+    (name) => performance.getEntriesByName(`mfe:remote:${name}:ready`).length > 0,
+    remoteName,
+  );
+}

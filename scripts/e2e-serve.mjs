@@ -4,7 +4,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import process from "node:process";
-import { serveModules } from "@lib-core-mfe/module-frontend/server";
+import { createProviderHandler } from "../modules/frontend/provider-handler.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const env = {
@@ -75,7 +75,7 @@ function runBuilds() {
       "--workspace=mfe-admin",
       "--ignore-scripts",
     ],
-    "Remote module builds",
+    "Remote fragment builds",
   );
 }
 
@@ -98,20 +98,11 @@ async function waitForServer(url, child) {
 
 async function startModuleServers() {
   for (const provider of providers) {
-    const middleware = serveModules({
-      modulesPath: path.join(
-        root,
-        "modules",
-        "frontend",
-        "packages",
-        provider.appName,
-        "dist",
-        "modules",
-      ),
+    const middleware = createProviderHandler({
       appName: provider.appName,
-      basePath: "/api/modules",
-      corsOrigins: ["http://127.0.0.1:4273"],
-      include: [provider.moduleName],
+      fragmentName: provider.moduleName,
+      distRoots: [path.join(root, "modules", "frontend", "packages", provider.appName, "dist")],
+      hostOrigins: "http://127.0.0.1:4273",
     });
     const server = createServer((request, response) => {
       void middleware(request, response);
@@ -151,7 +142,7 @@ try {
   await startModuleServers();
   await waitForServer("http://127.0.0.1:4280/students");
   for (const provider of providers) {
-    await waitForServer(`http://127.0.0.1:${provider.port}/api/modules/__modules_configuration`);
+    await waitForServer(`http://127.0.0.1:${provider.port}/api/fragments/${provider.moduleName}`);
   }
 
   const host = spawn(
@@ -178,7 +169,7 @@ try {
   });
   await waitForServer("http://127.0.0.1:4273/", host);
 
-  console.log("Host and all five manifest-based module providers are ready.");
+  console.log("Host and all five fragment providers are ready.");
   await new Promise((resolve) => {
     children[0].once("exit", resolve);
   });

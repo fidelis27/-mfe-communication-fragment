@@ -56,10 +56,10 @@ foreach ($provider in $providers) {
     continue
   }
 
-  $modulesPath = Join-Path (Join-Path $packages $provider.AppName) "dist\modules"
-  $command = "Set-Location '$root'; node ./scripts/module-serve.mjs '$modulesPath' '$($provider.AppName)' '$($provider.ModuleName)' '$($provider.Port)' 'http://localhost:4174'"
+  $distPath = Join-Path (Join-Path $packages $provider.AppName) "dist"
+  $command = "Set-Location '$root'; node ./scripts/module-serve.mjs '$distPath' '$($provider.AppName)' '$($provider.ModuleName)' '$($provider.Port)' 'http://localhost:4174'"
   Start-Process powershell -ArgumentList "-NoExit", "-Command", $command | Out-Null
-  Write-Host "Started $($provider.Name) module provider on port $($provider.Port)"
+  Write-Host "Started $($provider.Name) fragment provider on port $($provider.Port)"
 }
 
 if (-not (Get-NetTCPConnection -LocalPort 4174 -State Listen -ErrorAction SilentlyContinue)) {
