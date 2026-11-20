@@ -2,7 +2,7 @@
 
 ## Runtime model
 
-The host loads each module on demand through `@lib-core-mfe/module-frontend`.
+The host loads each module on demand as a server-rendered fragment through `@lib-core-mfe/fragment-frontend`; the figures below were measured with the previous `module-frontend` runtime and have not been re-measured.
 Every module bundles its own React, React DOM, `@mfe/shared`, and
 `@tanstack/react-query` runtime. Each remote creates its own `QueryClient`;
 query data is isolated by MFE and is not shared across remotes. The resulting

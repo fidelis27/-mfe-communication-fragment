@@ -15,7 +15,7 @@ flowchart LR
     subgraph browser["Browser"]
         host["Host shell<br/>auth, routing, one WebSocket"]
         remotes["5 MFE modules<br/>institution, student, admin,<br/>activity, dashboard"]
-        host -- "manifest + integrity-checked IIFE" --> remotes
+        host -- "fragment HTML + integrity-checked IIFE" --> remotes
     end
 
     api["secretaria-backend<br/>(external, own repository)"]
@@ -34,8 +34,9 @@ flowchart LR
 
 ## 2. Runtime composition in the browser
 
-The host owns the shell. Modules are separate IIFE builds, loaded on demand
-from manifests served by provider Vercel Functions. Each module bundles its own
+The host owns the shell. Modules are server-rendered fragments: each provider
+renders its fragment on a Vercel Function, the Host's server fetches it, and the
+browser hydrates it by loading the provider's IIFE. Each module bundles its own
 React and dependencies; they are not shared runtime singletons. Each remote
 owns a separate `QueryClient` and cache; query data is not shared across MFEs.
 
@@ -71,14 +72,14 @@ flowchart TB
         tokens["Design tokens"]
     end
 
-    boundary -- "manifest + SRI-checked module<br/>provider origin from VITE_MFE_*_URL" --> remotes
+    boundary -- "fragment HTML (host server) + SRI-checked script<br/>provider origin from VITE_MFE_*_URL" --> remotes
     host --> shared
     remotes --> shared
     remotes --> featureApi --> requestApi --> authlib
     remotes --> queries
 ```
 
-If one module is down, only its `<Module>` fallback is shown; the shell and the other modules keep working.
+If one module is down, only its fragment fallback is shown; the shell and the other modules keep working.
 The per-remote cache decision is documented in [ADR-0001](./adr/0001-query-client-per-remote.md).
 
 ---
@@ -213,11 +214,11 @@ flowchart LR
     supa["Supabase Auth"]
 
     gh --> vercel
-    vh -- "manifest origin" --> v1
-    vh -- "manifest origin" --> v2
-    vh -- "manifest origin" --> v3
-    vh -- "manifest origin" --> v4
-    vh -- "manifest origin" --> v5
+    vh -- "fragment origin" --> v1
+    vh -- "fragment origin" --> v2
+    vh -- "fragment origin" --> v3
+    vh -- "fragment origin" --> v4
+    vh -- "fragment origin" --> v5
     vh -- "VITE_API_URL" --> api
     vh -- "VITE_SUPABASE_URL" --> supa
 ```
@@ -252,6 +253,6 @@ to approved Host origins.
 - The frontend does not send `x-correlation-id` with HTTP requests.
 - Backend authorization and emitted event behavior are authoritative; the event contract comparison in section 5 shows the frontend declarations and current backend emissions.
 - Playwright E2E tests load the built Host and five real modules through the
-  library manifest middleware, while API and
+  fragment providers and the Host server, while API and
   WebSocket traffic is intercepted for deterministic browser checks. The scope
   and limitations are recorded in [ADR-0002](./adr/0002-federation-e2e-testing.md).

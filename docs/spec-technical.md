@@ -34,8 +34,9 @@ Interface MFE
 - MariaDB/MySQL para persistencia do prototipo.
 - Nenhum repositorio de negocio em memoria; testes de integracao usam banco de
   teste MariaDB/MySQL.
-- `@lib-core-mfe/module-frontend` para registrar MFEs como bundles IIFE,
-  distribuir manifesto com SRI pelas Vercel Functions e carregá-los no Host.
+- `@lib-core-mfe/fragment-frontend` para renderizar cada MFE como fragmento no
+  servidor do provider (Vercel Function), entregar o bundle IIFE com SRI e
+  hidratá-lo no Host.
 - Cada módulo empacota sua própria cópia de React e dependências; não há
   singleton de runtime. O estado compartilhado de autenticação e do bus usa
   pontes explicitamente armazenadas em `globalThis`.
@@ -43,7 +44,7 @@ Interface MFE
 - `window.bus`/`EventTarget` somente para comunicação local entre MFEs na mesma
   página; não substitui o canal backend.
 
-O Host deve carregar os cinco MFEs pelo manifesto da biblioteca, verificar a
+O Host deve carregar os cinco MFEs como fragmentos buscados pelo seu servidor, verificar a
 integridade dos bundles e expor loading, fallback com retry e erros reportados.
 O Host e cada provider sao implantados independentemente; cada provider
 configura CORS para as origens aprovadas do Host.

@@ -46,7 +46,13 @@ export function createFragmentBff({ providers, basePath = BFF_PATH }) {
         allowedHosts,
       });
       const html = await fragment.html();
-      const { body: _body, html: _html, ...info } = fragment;
+      const info = {
+        id: fragment.id,
+        name: fragment.name,
+        appName: fragment.appName,
+        script: fragment.script,
+        ...(fragment.integrity ? { integrity: fragment.integrity } : {}),
+      };
       return sendJson(res, 200, { fragment: info, html });
     } catch (error) {
       console.error(`[host] fragment "${name}" failed`, error);

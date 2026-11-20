@@ -1,6 +1,6 @@
 # School Secretariat — Micro-Frontend Platform
 
-A school-administration prototype built as a **micro-frontend (MFE) ecosystem**. A React host shell composes five independently deployable modules at runtime with `@lib-core-mfe/module-frontend`, and the modules stay in sync through a **typed, versioned domain-event contract** delivered over WebSocket.
+A school-administration prototype built as a **micro-frontend (MFE) ecosystem**. A React host shell composes five independently deployable modules at runtime as server-rendered fragments with `@lib-core-mfe/fragment-frontend`, and the modules stay in sync through a **typed, versioned domain-event contract** delivered over WebSocket.
 
 The Go API that backs it lives in [`secretaria-backend`](https://github.com/fidelis27/secretaria-backend).
 
@@ -30,13 +30,13 @@ Browser
 
 ### Key design decisions
 
-- **Runtime composition.** Each MFE builds an IIFE that registers with `Modularize`; the host loads it through `<Module>` using a manifest served by a Vercel Function. Each module has its own React runtime. Copies of `@mfe/shared` coordinate through the page-global `__mfeBus` and Supabase auth bridge.
+- **Runtime composition.** Each MFE builds a browser IIFE that registers with `registerFragment` and a server bundle served by a Vercel Function (`createFragmentHandler`). The host's own server fetches the rendered fragment, and `<FragmentSlot>` embeds it and hydrates it with the module's own React. Each module has its own React runtime. Copies of `@mfe/shared` coordinate through the page-global `__mfeBus` and Supabase auth bridge.
 - **Independent builds and deploys.** Each package has its own Vite build and its own Vercel project.
 - **Two communication layers, each with one job.**
   - _In-page bus_ (`globalThis.__mfeBus`): local coordination between MFEs on the same page. Channels are namespaced `cmd:*` (host to MFE), `evt:*` (MFE to host) and `domain:*`. If nobody is listening, events wait in a per-channel queue (100 items, TTL, default 10 s); once a listener exists, delivery is fan-out.
   - _Backend domain events over WebSocket_: the host owns a single connection and re-dispatches each event to the bus, so remotes never open their own sockets.
 - **Versioned event contract.** Every event carries `eventId`, `type`, `version`, `source`, `correlationId`, `occurredAt` and `payload`. Types are a discriminated union in `@mfe/shared`, and the `useDomainEvents` hook handles authenticated connection, reconnect with backoff, cleanup and typed parsing.
-- **Failure isolation.** `<Module>` exposes loading, retry fallback, lifecycle callbacks and error reporting, so one unavailable module does not take down the shell.
+- **Failure isolation.** The host shows a loading state and a retry fallback, and reports errors, per fragment, so one unavailable module does not take down the shell.
 - **Accessibility as a gate.** Skip link, labelled fields, `aria-live` / `aria-busy` on async regions, `jest-axe` tests per MFE, and a color-contrast check that runs in CI.
 - **Shared visual language.** Semantic tokens and typed UI primitives live in `@mfe/shared`; each module's CSS is bundled and scoped beneath its own root to prevent styles from leaking across the page. See [`docs/design-system.md`](docs/design-system.md).
 - **Performance by evidence.** The plan in [`docs/performance-improvement-plan.md`](docs/performance-improvement-plan.md) follows one rule: measure, change the smallest thing, measure again. It also lists what _not_ to optimize (no blanket memoization, no preloading every MFE).
@@ -73,12 +73,12 @@ npm run dev:local     # PowerShell launcher (Windows): starts the host and the r
 
 Build-time variables:
 
-| Variable                                      | Purpose                                                    |
-| --------------------------------------------- | ---------------------------------------------------------- |
-| `VITE_API_URL`                                | Backend base URL (HTTP and WebSocket)                      |
-| `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | Supabase Auth (anon key only; never the service role key)  |
-| `VITE_MFE_*_URL`                              | Provider origins used by the host                          |
-| `MFE_HOST_ORIGINS`                            | Comma-separated Host origins allowed by provider manifests |
+| Variable                                      | Purpose                                                                 |
+| --------------------------------------------- | ----------------------------------------------------------------------- |
+| `VITE_API_URL`                                | Backend base URL (HTTP and WebSocket)                                   |
+| `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | Supabase Auth (anon key only; never the service role key)               |
+| `VITE_MFE_*_URL`                              | Provider origins used by the host                                       |
+| `MFE_HOST_ORIGINS`                            | Comma-separated Host origins allowed to load a provider's client script |
 
 Details: [`docs/local-development.md`](docs/local-development.md) and [`docs/deployment.md`](docs/deployment.md).
 
@@ -88,7 +88,7 @@ CI runs on every PR and a final **CI gate** job fails if any required job fails:
 
 - ESLint, TypeScript typecheck, Prettier check
 - Vitest unit, integration and accessibility tests
-- Playwright E2E tests against the built Host and five real manifest-served modules, with deterministic API and WebSocket mocks
+- Playwright E2E tests against the built Host and five real fragment providers, with deterministic API and WebSocket mocks
 - Playwright checks that student-write 403 and student-list 403/404 responses are visible and do not leave a success state or stale rows
 - Color-contrast check
 - `npm audit --audit-level=high`

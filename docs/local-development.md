@@ -221,7 +221,7 @@ npm run build --workspace=mfe-activity
 
 Copie `.env.example` para `.env` na raiz quando precisar sobrescrever as
 origens dos providers ou a API. As variáveis `VITE_MFE_*_URL` devem conter as
-origens, sem caminho de manifesto. Para desenvolvimento local, o script
+origens, sem caminho de fragmento. Para desenvolvimento local, o script
 configura as portas de cada provider e a origem permitida do Host.
 
 Para iniciar backend, Host e os cinco providers no Windows:
@@ -230,8 +230,8 @@ Para iniciar backend, Host e os cinco providers no Windows:
 npm run dev:local
 ```
 
-O script compila os módulos, inicia o middleware local `serveModules` para cada
-provider e abre o preview do Host. Ele também tenta iniciar o backend; o
+O script compila os módulos, inicia o handler local de fragmentos para cada
+provider e abre o preview do Host (que serve `/api/fragments`). Ele também tenta iniciar o backend; o
 MariaDB deve estar ativo no XAMPP. O Host fica em
 [http://localhost:4174/](http://localhost:4174/). Para encerrar os processos:
 
@@ -240,7 +240,7 @@ npm run stop:local
 ```
 
 O comando de validação verifica health, autenticação, CORS, métricas,
-WebSocket, os cinco manifestos e os respectivos assets:
+WebSocket, os cinco fragmentos e os respectivos scripts:
 
 ```powershell
 npm run validate:local
@@ -258,26 +258,27 @@ provider; localmente, use `http://localhost:4174`.
 | Dashboard   | `http://localhost:4178` |
 | Admin       | `http://localhost:4179` |
 
-Cada manifesto fica em `/api/modules/__modules_configuration`. Os assets
-listados no manifesto são servidos pelo middleware com metadados SRI.
+Cada fragmento fica em `/api/fragments/<modulo>`. O script do módulo fica em
+`/api/fragments/assets/<modulo>.client.js`, e o hash SRI vai no header
+`x-fragment-integrity` da resposta do fragmento.
 
-## 8. Verificar os manifestos
+## 8. Verificar os fragmentos
 
-Por exemplo, para consultar o manifesto Student e o bundle indicado por ele:
+Por exemplo, para consultar o fragmento Student e o script indicado por ele:
 
 ```powershell
-$manifest = Invoke-RestMethod "http://localhost:4173/api/modules/__modules_configuration" -Headers @{ Origin = "http://localhost:4174" }
-$manifest.modules.student.scripts[0]
+$fragment = Invoke-WebRequest "http://localhost:4173/api/fragments/student" -UseBasicParsing
+$fragment.Headers["x-fragment-script"]
 ```
 
-`npm run validate:local` verifica todos os manifestos, os assets esperados e
+`npm run validate:local` verifica todos os fragmentos, os scripts esperados e
 as respostas CORS. O Host deve retornar `200` em
 `http://localhost:4174/`.
 
 ## 9. Testes E2E com Playwright
 
 Os testes constroem o Host e os cinco bundles IIFE, iniciam os providers locais
-com o middleware real `serveModules` e carregam os módulos sem mocks de
+com o handler real de fragmentos e carregam os módulos sem mocks de
 componentes. API e WebSocket são interceptados na rede para manter os cenários
 determinísticos; não é necessário iniciar o backend, MariaDB ou Supabase.
 Essa separação entre integração de browser e validação dos serviços está
@@ -310,7 +311,7 @@ npx playwright show-report
 Em caso de falha, screenshots, vídeos e traces ficam em `test-results/`; o CI
 também publica o relatório e esses arquivos como artefato. Os testes cobrem
 navegação pelos cinco módulos, cadastro de estudante, atualização por evento
-entre Activity e Dashboard, falha do manifesto com retry, fallback de falha e
+entre Activity e Dashboard, falha do fragmento com retry, fallback de falha e
 respostas HTTP 401.
 
 ## Problemas comuns
@@ -346,13 +347,13 @@ Stop-Process -Id <PID> -Force
 Os scripts standalone continuam disponiveis por workspace. Execute o preview no
 diretorio do pacote, depois de gerar o build standalone, para que o Vite use o
 `dist` correto. O Host integrado deve ser iniciado por `npm run dev:local`,
-que tambem sobe os providers de manifesto.
+que tambem sobe os providers de fragmento.
 
 ### Host responde, mas um modulo nao carrega
 
-Confirme que o manifesto do provider responde em
-`/api/modules/__modules_configuration`, que lista o módulo esperado e que o
-asset correspondente retorna `200`. Verifique também `MFE_HOST_ORIGINS` no
+Confirme que o fragmento do provider responde em
+`/api/fragments/<modulo>` com `200` e HTML, e que o script indicado em
+`x-fragment-script` retorna `200`. Verifique também `MFE_HOST_ORIGINS` no
 provider e se o `VITE_MFE_*_URL` do Host aponta para a origem correta.
 
 ### Backend não conecta no banco
