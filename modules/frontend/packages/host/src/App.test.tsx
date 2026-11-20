@@ -4,26 +4,30 @@ import { StrictMode } from "react";
 import { vi } from "vitest";
 import { REMOTE_READY_EVENT, type RemoteReadyEvent } from "./remoteLoadingMetrics";
 
-vi.mock("@lib-core-mfe/module-frontend/client", async () => {
+vi.mock("@lib-core-mfe/fragment-frontend/consumer", async () => {
   const React = await import("react");
   const { default: RemoteAppMock } = await import("./__mocks__/RemoteAppMock");
 
-  function ModuleMock({
-    moduleLifeCycleEvent,
-  }: {
-    moduleLifeCycleEvent?: { onMounted?: () => void };
-  }) {
-    const onMounted = moduleLifeCycleEvent?.onMounted;
-
-    React.useEffect(() => {
-      onMounted?.();
-    }, [onMounted]);
-
+  function FragmentSlotMock({ onHydrated }: { onHydrated?: () => void }) {
+    React.useEffect(() => onHydrated?.(), [onHydrated]);
     return React.createElement(RemoteAppMock);
   }
 
-  return { Module: ModuleMock };
+  return { FragmentSlot: FragmentSlotMock };
 });
+
+const fragmentResponse = () =>
+  new Response(
+    JSON.stringify({
+      fragment: {
+        id: "fragment-1",
+        name: "student",
+        appName: "mfe-student",
+        script: "http://localhost:4173/api/fragments/assets/student.client.js",
+      },
+      html: "<div data-fragment-root></div>",
+    }),
+  );
 
 const authMocks = vi.hoisted(() => ({
   initializeAuth: vi.fn(),
@@ -42,6 +46,10 @@ import { listen, type DomainEvent } from "@mfe/shared";
 
 async function renderHost(options: { authenticated: boolean; path?: string }) {
   vi.resetModules();
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(() => Promise.resolve(fragmentResponse())),
+  );
   vi.stubEnv("VITE_SUPABASE_URL", "https://project.supabase.co");
   vi.stubEnv("VITE_SUPABASE_ANON_KEY", "public-key");
   window.history.pushState({}, "", options.path ?? "/estudantes");

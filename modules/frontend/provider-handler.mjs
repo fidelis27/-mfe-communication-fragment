@@ -115,7 +115,9 @@ export function createProviderHandler({
     const { pathname } = new URL(req.url ?? "/", "http://localhost");
     if (pathname === scriptPath) return serveScript(req, res);
     try {
-      return await (await loadFragmentHandler())(req, res);
+      return await (
+        await loadFragmentHandler()
+      )(req, res);
     } catch (error) {
       console.error(`[${appName}] failed to serve fragment`, error);
       if (!res.headersSent) return sendJson(res, 500, { error: "Fragment unavailable" });
