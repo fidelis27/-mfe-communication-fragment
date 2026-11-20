@@ -1,0 +1,512 @@
+@import "@mfe/shared/tokens.css";
+.appRoot {
+  min-height: 100dvh;
+  background: var(--color-surface-page);
+  color: var(--color-text-primary);
+  height: 100dvh;
+}
+
+.appRoot :global(.skip-link) {
+  background: var(--color-surface-page);
+  color: var(--color-text-primary);
+  left: 12px;
+  padding: var(--space-2-5) var(--space-3-5);
+  position: fixed;
+  top: -60px;
+  z-index: 10;
+}
+
+.appRoot :global(.skip-link:focus) {
+  top: 12px;
+}
+
+.appRoot :global(.host-shell) {
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.appRoot :global(.host-sidebar) {
+  background: var(--color-surface-sidebar);
+  color: var(--color-text-on-brand);
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-7-5) var(--space-5);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.appRoot :global(.brand) {
+  align-items: center;
+  display: flex;
+  font-size: var(--font-size-sm);
+  gap: var(--space-2-5);
+  line-height: 1.05;
+}
+
+.appRoot :global(.brand > span) {
+  align-items: center;
+  background: var(--color-brand);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-on-brand);
+  display: flex;
+  font: var(--font-weight-semibold) var(--font-size-xs) var(--font-body);
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+}
+
+.appRoot :global(.sidebar-label) {
+  color: var(--color-sidebar-text-muted);
+  font: var(--font-weight-semibold) var(--font-size-xs) var(--font-body);
+  letter-spacing: 1.4px;
+  margin: var(--space-14-5) var(--space-3) var(--space-3);
+  text-transform: uppercase;
+}
+
+.appRoot :global(.host-nav-wrap) {
+  min-width: 0;
+}
+
+.appRoot :global(.nav-item) {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-control);
+  color: var(--color-sidebar-text-muted);
+  cursor: pointer;
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3-25) var(--space-3);
+  text-align: left;
+  text-decoration: none;
+  width: 100%;
+}
+
+.appRoot :global(.nav-copy) {
+  min-width: 0;
+}
+
+.appRoot :global(.nav-item.active) {
+  background: var(--color-sidebar-active-bg);
+  color: var(--color-sidebar-text);
+}
+
+.appRoot :global(.nav-item b),
+.appRoot :global(.nav-item small) {
+  display: block;
+}
+
+.appRoot :global(.nav-item b) {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+}
+
+.appRoot :global(.nav-item small) {
+  color: var(--color-sidebar-text-muted);
+  font: var(--font-size-xs) / 1.35 var(--font-body);
+  margin-top: var(--space-0-75);
+}
+
+.appRoot :global(.sidebar-footer) {
+  color: var(--color-sidebar-text-muted);
+  font: var(--font-size-xs) / 1.6 var(--font-body);
+  margin-top: auto;
+  padding: var(--space-4) var(--space-3);
+}
+
+.appRoot :global(.sidebar-footer small) {
+  color: var(--color-sidebar-text-muted);
+}
+
+.appRoot :global(.online-dot) {
+  background: var(--color-success);
+  border-radius: var(--radius-pill);
+  display: inline-block;
+  height: 7px;
+  margin-right: var(--space-1-5);
+  width: 7px;
+}
+
+.appRoot :global(.host-main) {
+  height: 100dvh;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+}
+
+.appRoot :global(.topbar) {
+  align-items: center;
+  background: var(--color-surface-card);
+  border-bottom: 1px solid var(--color-border-default);
+  color: var(--color-text-secondary);
+  display: flex;
+  font: var(--font-size-xs) var(--font-body);
+  gap: var(--space-4);
+  justify-content: space-between;
+  min-height: 64px;
+  padding: var(--space-3) var(--space-shell-inline);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.appRoot :global(.topbar-start),
+.appRoot :global(.topbar-end) {
+  align-items: center;
+  display: flex;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.appRoot :global(.breadcrumb ol) {
+  align-items: center;
+  display: flex;
+  list-style: none;
+  margin: 0;
+  min-width: 0;
+  padding: 0;
+}
+
+.appRoot :global(.breadcrumb li) {
+  align-items: center;
+  display: flex;
+  min-width: 0;
+}
+
+.appRoot :global(.breadcrumb li + li::before) {
+  align-items: center;
+  color: var(--color-border-default);
+  content: "›";
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: var(--font-size-lg);
+  justify-content: center;
+  line-height: 1;
+  margin-inline: var(--space-2);
+}
+
+.appRoot :global(.breadcrumb a) {
+  text-decoration: none;
+}
+
+.appRoot :global(.breadcrumb a:hover) {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+}
+
+.appRoot :global(.breadcrumb li[aria-current="page"]) {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+  max-width: 30ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appRoot :global(.mobile-nav-toggle) {
+  align-items: center;
+  background: var(--color-brand-soft);
+  border: 1px solid var(--color-brand-soft);
+  border-radius: var(--radius-pill);
+  color: var(--color-brand-soft-text);
+  cursor: pointer;
+  display: none;
+  font: var(--font-weight-semibold) var(--font-size-xs) var(--font-body);
+  min-height: 40px;
+  padding: var(--space-2) var(--space-3);
+}
+
+.appRoot :global(.account-menu) {
+  position: relative;
+}
+
+.appRoot :global(.user-chip) {
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font: var(--font-weight-semibold) var(--font-size-xs) var(--font-body);
+  min-height: 36px;
+  padding: var(--space-2) var(--space-3);
+}
+
+.appRoot :global(.user-chip:hover) {
+  background: var(--color-brand-soft);
+  border-color: var(--color-brand-soft);
+  color: var(--color-brand-soft-text);
+}
+
+.appRoot :global(.account-popup) {
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-md);
+  min-width: 140px;
+  padding: var(--space-1-5);
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 20;
+}
+
+.appRoot :global(.account-popup button) {
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-control);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  display: block;
+  padding: var(--space-2-5) var(--space-3);
+  text-align: left;
+  width: 100%;
+}
+
+.appRoot :global(.account-popup button:hover) {
+  background: var(--color-warning-soft);
+}
+
+.appRoot :global(.navigation-backdrop) {
+  display: none;
+}
+
+.appRoot :global(.remote-state) {
+  padding: var(--space-login-block) var(--space-login-inline);
+}
+
+.appRoot :global(.remote-state h1) {
+  font-size: clamp(1.6rem, 2.6vw, 2.1rem);
+  font-weight: var(--font-weight-regular);
+  margin: var(--space-3) 0;
+}
+
+.appRoot :global(.remote-state p) {
+  color: var(--color-text-secondary);
+  font: var(--font-size-md) / 1.5 var(--font-body);
+}
+
+.appRoot :global(.remote-state form) {
+  display: grid;
+  gap: var(--space-4-5);
+  margin-top: var(--space-7);
+  max-width: 380px;
+}
+
+.appRoot :global(.remote-state label) {
+  color: var(--color-text-secondary);
+  display: grid;
+  font: var(--font-weight-semibold) var(--font-size-xs) var(--font-body);
+  gap: var(--space-2);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.appRoot :global(.remote-state input) {
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-control-border);
+  color: var(--color-text-primary);
+  font: var(--font-size-md) var(--font-body);
+  letter-spacing: normal;
+  padding: var(--space-3-25) var(--space-3-5);
+  text-transform: none;
+  width: 100%;
+}
+
+.appRoot :global(.remote-state input:focus-visible) {
+  border-color: var(--color-focus-ring);
+}
+
+.appRoot :global(.remote-state form [role="alert"]) {
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+.appRoot :global(.remote-state form button),
+.appRoot :global(.remote-error button) {
+  background: var(--color-brand);
+  border: 0;
+  border-radius: var(--radius-control);
+  color: var(--color-text-on-brand);
+  cursor: pointer;
+  font: var(--font-weight-semibold) var(--font-size-xs) var(--font-body);
+  min-height: 44px;
+  padding: var(--space-3-75) var(--space-4-5);
+}
+
+.appRoot :global(.remote-state form button:hover:not(:disabled)),
+.appRoot :global(.remote-error button:hover:not(:disabled)) {
+  background: var(--color-brand-hover);
+}
+
+.appRoot :global(.remote-state form button:disabled) {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.appRoot :global(.remote-error button) {
+  margin-top: var(--space-4-5);
+}
+
+.appRoot :global(.remote-skeleton .eyebrow) {
+  margin-bottom: var(--space-4-5);
+}
+
+.appRoot :global(.skeleton-line),
+.appRoot :global(.skeleton-card) {
+  animation: skeleton-pulse 1.2s ease-in-out infinite alternate;
+  background: linear-gradient(90deg, var(--color-surface-muted), var(--color-border-default));
+  border-radius: var(--radius-control);
+}
+
+.appRoot :global(.skeleton-title) {
+  height: 38px;
+  max-width: 360px;
+}
+
+.appRoot :global(.skeleton-copy) {
+  height: 18px;
+  margin-top: var(--space-4);
+  max-width: 520px;
+}
+
+.appRoot :global(.skeleton-copy.short) {
+  max-width: 320px;
+}
+
+.appRoot :global(.skeleton-card-grid) {
+  display: grid;
+  gap: var(--space-4-5);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: var(--space-8);
+}
+
+.appRoot :global(.skeleton-card) {
+  min-height: 160px;
+}
+
+.appRoot :global(.remote-state .eyebrow),
+.appRoot :global(.remote-skeleton .eyebrow) {
+  color: var(--color-brand);
+  font: var(--font-weight-semibold) var(--font-size-xs) var(--font-body);
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+.appRoot :global(.sr-only) {
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  height: 1px;
+  margin: calc(-1 * var(--space-px));
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+@keyframes skeleton-pulse {
+  from {
+    opacity: 0.65;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 1023px) {
+  .appRoot :global(.host-shell) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .appRoot :global(.host-sidebar) {
+    bottom: 0;
+    height: 100dvh;
+    left: 0;
+    max-width: calc(100vw - 48px);
+    padding: var(--space-5-5) var(--space-4-5);
+    position: fixed;
+    transform: translateX(-105%);
+    transition:
+      transform 180ms ease,
+      visibility 180ms ease;
+    visibility: hidden;
+    width: 280px;
+  }
+
+  .appRoot :global(.host-sidebar.navigation-open) {
+    transform: translateX(0);
+    visibility: visible;
+  }
+
+  .appRoot :global(.navigation-backdrop) {
+    background: color-mix(in srgb, var(--color-surface-sidebar), transparent 40%);
+    border: 0;
+    display: block;
+    inset: 0;
+    position: fixed;
+    z-index: 20;
+  }
+
+  .appRoot :global(.sidebar-label) {
+    margin: var(--space-8) var(--space-3) var(--space-3);
+  }
+
+  .appRoot :global(.mobile-nav-toggle) {
+    display: inline-flex;
+  }
+
+  .appRoot :global(.host-sidebar nav) {
+    display: grid;
+    gap: var(--space-1);
+    margin-top: 0;
+  }
+
+  .appRoot :global(.nav-item) {
+    min-width: 0;
+  }
+
+  .appRoot :global(.nav-item small) {
+    display: block;
+  }
+}
+
+@media (max-width: 520px) {
+  .appRoot :global(.topbar) {
+    align-items: center;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .appRoot :global(.topbar-start),
+  .appRoot :global(.topbar-end) {
+    gap: var(--space-2-5);
+  }
+
+  .appRoot :global(.topbar-start) {
+    flex: 1;
+  }
+
+  .appRoot :global(.breadcrumb ol) {
+    gap: 0;
+  }
+
+  .appRoot :global(.breadcrumb li + li::before) {
+    margin-inline: var(--space-1-5);
+  }
+
+  .appRoot :global(.breadcrumb li[aria-current="page"]) {
+    max-width: 16ch;
+  }
+
+  .appRoot :global(.topbar-end) {
+    flex-shrink: 0;
+  }
+}

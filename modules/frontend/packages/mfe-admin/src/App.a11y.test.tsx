@@ -1,0 +1,112 @@
+import React from "react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { axe, toHaveNoViolations } from "jest-axe";
+import { vi } from "vitest";
+import App from "./App";
+import { createQueryWrapper } from "./test-utils";
+
+expect.extend(toHaveNoViolations);
+
+const sharedMocks = vi.hoisted(() => ({
+  readAuthIdentity: vi.fn(),
+}));
+
+vi.mock("@mfe/shared", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@mfe/shared")>()),
+  ...sharedMocks,
+}));
+
+function jsonResponse(body: unknown, status = 200) {
+  if (status === 204) return Promise.resolve(new Response(null, { status }));
+  return Promise.resolve(
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { "Content-Type": "application/json" },
+    }),
+  );
+}
+
+function setupAuthenticatedFetch() {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+
+      if (!init?.method && url.endsWith("/users")) {
+        return jsonResponse([
+          {
+            id: "user-1",
+            name: "Pessoa Existente",
+            email: "pessoa@demo",
+            status: "active",
+            superAdmin: false,
+          },
+        ]);
+      }
+      if (!init?.method && url.endsWith("/institutions")) {
+        return jsonResponse([{ id: "inst-1", name: "Instituição Demo" }]);
+      }
+      if (!init?.method && url.endsWith("/groups")) {
+        return jsonResponse([
+          {
+            id: "group-1",
+            institutionId: "inst-1",
+            institutionName: "Instituição Demo",
+            name: "Grupo Verde",
+          },
+        ]);
+      }
+      if (!init?.method && url.endsWith("/groups/group-1/members")) {
+        return jsonResponse([
+          {
+            userId: "viewer-1",
+            userName: "Ana Admin",
+            userEmail: "ana@demo",
+            role: "admin",
+          },
+        ]);
+      }
+      if (!init?.method && url.endsWith("/groups/group-1/candidates")) {
+        return jsonResponse([{ id: "cand-1", name: "João Pessoa", email: "joao@demo" }]);
+      }
+
+      return jsonResponse([]);
+    }),
+  );
+}
+
+describe("Admin accessibility", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    Reflect.deleteProperty(globalThis, "__mfeHostReady");
+  });
+
+  beforeEach(() => {
+    Reflect.set(globalThis, "__mfeHostReady", true);
+    vi.clearAllMocks();
+    sharedMocks.readAuthIdentity.mockResolvedValue({
+      userId: "viewer-1",
+      email: "ana@demo",
+      name: "Ana Admin",
+      roles: ["super_admin"],
+    });
+    setupAuthenticatedFetch();
+  });
+
+  it("has no detectable axe violations on the people tab", async () => {
+    const { container } = render(<App />, { wrapper: createQueryWrapper() });
+
+    await waitFor(() => expect(screen.getByText("Pessoa Existente")).toBeInTheDocument());
+
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("has no detectable axe violations on the groups tab", async () => {
+    const { container } = render(<App />, { wrapper: createQueryWrapper() });
+
+    fireEvent.click(screen.getByRole("tab", { name: "Grupos e acessos" }));
+    await waitFor(() => expect(screen.getByText("Grupo Verde")).toBeInTheDocument());
+
+    expect(await axe(container)).toHaveNoViolations();
+  });
+});
