@@ -55,8 +55,9 @@ ser qualquer um dos dois. Se `MFE_HOST_ORIGINS` faltar ou for invalido, ou se
 `dist` nao existir, o fragmento responde `500` com um JSON `error`
 explicando a causa, e a mesma mensagem aparece nos logs da Function.
 
-Os projetos de producao seguem o padrao `mfe-communication-lib-<pacote>`, e o
-`.env.production` do Host aponta para `https://mfe-communication-lib-mfe-*.vercel.app`.
+Os projetos de producao seguem o padrao `mfe-communication-fragment-<pacote>`
+(`host` e `mfe-*`), e o `.env.production` do Host aponta para
+`https://mfe-communication-fragment-mfe-*.vercel.app`.
 Variaveis definidas no projeto Vercel do Host tem precedencia sobre esse arquivo.
 
 A chave anon/public e apropriada para o navegador; a seguranca dos dados da
