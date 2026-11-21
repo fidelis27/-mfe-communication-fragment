@@ -3,7 +3,15 @@
   "functions": {
     "api/fragments/[...path].ts": {
       "includeFiles": "dist/**"
+    },
+    "api/fragments/assets/[file].ts": {
+      "includeFiles": "dist/**"
     }
   },
-  "rewrites": [{ "source": "/((?!api).*)", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/((?!api).*)",
+      "destination": "/index.html"
+    }
+  ]
 }
