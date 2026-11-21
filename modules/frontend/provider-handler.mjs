@@ -45,6 +45,8 @@ function failWith(appName, message) {
  * - `GET <basePath>/<fragmentName>` streams the server-rendered fragment.
  * - `GET <basePath>/assets/<fragmentName>.client.js` serves the browser bundle with CORS
  *   limited to the Host origins; its SRI hash is sent with the fragment headers.
+ * - `GET <basePath>/assets/<fragmentName>.css` serves the module styles, which the Host server
+ *   embeds in the fragment HTML.
  *
  * `distRoots` are candidate `dist` directories containing `modules/<name>.js` (browser
  * bundle) and `server/fragment.server.js` (server bundle).
@@ -72,6 +74,9 @@ export function createProviderHandler({
   }
 
   const scriptPath = `${basePath}/assets/${fragmentName}.client.js`;
+  const cssPath = `${basePath}/assets/${fragmentName}.css`;
+  const cssFile = path.join(dist, "modules", `${fragmentName}.css`);
+  const css = existsSync(cssFile) ? readFileSync(cssFile) : undefined;
   const script = readFileSync(path.join(dist, "modules", `${fragmentName}.js`));
   const integrity = `sha384-${createHash("sha384").update(script).digest("base64")}`;
   const serverEntry = pathToFileURL(path.join(dist, "server", "fragment.server.js")).href;
@@ -87,7 +92,7 @@ export function createProviderHandler({
     return fragmentHandler;
   };
 
-  function serveScript(req, res) {
+  function serveAsset(req, res, body, contentType) {
     const origin = req.headers.origin;
     if (origin) {
       if (!origins.includes(origin)) return sendJson(res, 403, { error: "Origin not allowed" });
@@ -104,16 +109,22 @@ export function createProviderHandler({
       return sendJson(res, 405, { error: "Method not allowed" });
     }
     res.statusCode = 200;
-    res.setHeader("Content-Type", "application/javascript; charset=utf-8");
-    // The path is stable across deploys, so clients must revalidate against the SRI hash.
+    res.setHeader("Content-Type", contentType);
+    // The path is stable across deploys, so clients must revalidate (scripts via their SRI hash).
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("X-Content-Type-Options", "nosniff");
-    return res.end(req.method === "HEAD" ? undefined : script);
+    return res.end(req.method === "HEAD" ? undefined : body);
   }
 
   return async function handleRequest(req, res) {
     const { pathname } = new URL(req.url ?? "/", "http://localhost");
-    if (pathname === scriptPath) return serveScript(req, res);
+    if (pathname === scriptPath) {
+      return serveAsset(req, res, script, "application/javascript; charset=utf-8");
+    }
+    if (pathname === cssPath) {
+      if (!css) return sendJson(res, 404, { error: "No styles for this fragment" });
+      return serveAsset(req, res, css, "text/css; charset=utf-8");
+    }
     try {
       return await (
         await loadFragmentHandler()

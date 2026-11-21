@@ -43,7 +43,8 @@ test("host loads all five real modules through fragment navigation", async ({ pa
     await expect(
       page.getByRole("main").getByRole("heading", { level: 1, name: module.heading }),
     ).toBeVisible();
-    await expect(page.locator(`style[data-module-styles="${module.name}"]`)).toHaveCount(1);
+    // One copy comes with the fragment HTML; the client bundle may add its own when it loads.
+    await expect(page.locator(`style[data-module-styles="${module.name}"]`).first()).toBeAttached();
   }
 });
 
@@ -66,6 +67,19 @@ test("activity fragment failure shows retry fallback and then loads the module",
   await page.getByRole("button", { name: "Tentar novamente" }).click();
   await expect(page.getByRole("heading", { name: "Atividade do sistema." })).toBeVisible();
   expect(fragmentRequests).toBeGreaterThanOrEqual(2);
+});
+
+test("fragment styles arrive with the HTML even when the client script is blocked", async ({
+  page,
+}) => {
+  await setup(page);
+  await page.route("**/api/fragments/assets/student.client.js", (route) => route.abort());
+  await page.goto("/estudantes");
+
+  const styles = page.locator('style[data-module-styles="student"]');
+  await expect(styles).toHaveCount(1);
+  expect(await styles.evaluate((element) => element.textContent)).toContain("student-shell");
+  await expect(page.getByRole("heading", { name: /Vínculos que acompanham/ })).toBeVisible();
 });
 
 test("student form creates a record through the real remote", async ({ page }) => {

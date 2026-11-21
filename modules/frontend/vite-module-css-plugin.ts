@@ -28,6 +28,9 @@ export function inlineModuleCss(moduleName: string): Plugin {
 
       await writeFile(entryPath, `${entryCode}${styleInjection}`);
       await Promise.all(cssFiles.map((fileName) => unlink(path.join(outputDir, fileName))));
+      // The provider server also sends these styles with the fragment HTML, so the markup is
+      // styled before (and without) the browser bundle loading.
+      await writeFile(path.join(outputDir, `${moduleName}.css`), css);
     },
   };
 }
