@@ -1,0 +1,52 @@
+.skeleton {
+  min-width: 0;
+}
+
+.text .shape {
+  border-radius: var(--radius-control);
+  display: block;
+  height: 1rem;
+  max-width: 34rem;
+  width: 70%;
+}
+
+.card .shape {
+  border-radius: var(--radius-card);
+  display: block;
+  height: 9rem;
+  width: 100%;
+}
+
+.shape {
+  animation: shimmer 1.4s ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-muted) 0%,
+    var(--color-surface-card) 50%,
+    var(--color-surface-muted) 100%
+  );
+  background-size: 200% 100%;
+}
+
+.srOnly {
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+@keyframes shimmer {
+  to {
+    background-position-x: -200%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shape {
+    animation: none;
+    background: var(--color-surface-muted);
+  }
+}

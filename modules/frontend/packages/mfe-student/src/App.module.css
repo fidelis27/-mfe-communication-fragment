@@ -1,0 +1,211 @@
+@import "@mfe/shared/tokens.css";
+.appRoot {
+  min-height: 100dvh;
+  background: var(--color-surface-page);
+  color: var(--color-text-primary);
+}
+
+.appRoot :global(.student-shell) {
+  padding: var(--space-8) var(--space-page-inline);
+  background: var(--color-surface-page);
+}
+
+.appRoot :global(.student-hero) {
+  max-width: 760px;
+}
+
+.appRoot :global(.eyebrow) {
+  color: var(--color-brand);
+  font: var(--font-weight-semibold) var(--font-size-xs) / var(--line-height-tight) var(--font-body);
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+
+.appRoot :global(h1) {
+  font-size: clamp(1.6rem, 2.6vw, 2.1rem);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.02;
+  margin: var(--space-4-5) 0;
+  max-width: 760px;
+}
+
+.appRoot :global(.lede) {
+  color: var(--color-text-muted);
+  font: var(--font-size-md) / 1.5 var(--font-body);
+  max-width: 520px;
+}
+
+.appRoot :global(.connection) {
+  align-items: center;
+  color: var(--color-text-muted);
+  display: inline-flex;
+  font: var(--font-size-xs) var(--font-body);
+  gap: var(--space-2);
+  margin-top: var(--space-4-5);
+}
+
+.appRoot :global(.connection i) {
+  background: var(--color-success);
+  border-radius: var(--radius-pill);
+  height: 8px;
+  width: 8px;
+}
+
+.appRoot :global(.student-grid) {
+  display: grid;
+  gap: var(--space-14);
+  grid-template-columns: minmax(260px, 340px) minmax(320px, 1fr);
+  margin-top: var(--space-18);
+  max-width: 1080px;
+}
+
+.appRoot :global(.student-form),
+.appRoot :global(.student-list) {
+  border-top: 1px solid var(--color-border-default);
+  padding-top: var(--space-5);
+}
+
+.appRoot :global(.section-heading) {
+  align-items: center;
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-7);
+}
+
+.appRoot :global(.section-heading h2) {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-regular);
+  margin: 0;
+}
+
+.appRoot :global(.section-heading strong) {
+  color: var(--color-brand);
+  font: var(--font-weight-semibold) var(--font-size-xs) var(--font-body);
+  margin-left: auto;
+}
+
+.appRoot :global(.section-number) {
+  color: var(--color-brand);
+  font: var(--font-weight-semibold) var(--font-size-xs) var(--font-body);
+}
+
+.appRoot :global(.student-form > .field) {
+  margin-top: var(--space-5-5);
+}
+
+.appRoot :global(select:disabled) {
+  color: var(--color-text-secondary);
+  cursor: wait;
+}
+
+.appRoot :global(button) {
+  background: var(--color-brand);
+  border: 0;
+  border-radius: var(--radius-control);
+  color: var(--color-text-on-brand);
+  cursor: pointer;
+  font: var(--font-weight-semibold) var(--font-size-xs) var(--font-body);
+  min-height: 44px;
+  margin-top: var(--space-8);
+  padding: var(--space-3-75) var(--space-4-5);
+  width: 100%;
+}
+
+.appRoot :global(button:hover:not(:disabled)) {
+  background: var(--color-brand-hover);
+}
+
+.appRoot :global(button span) {
+  float: right;
+  font-size: var(--font-size-lg);
+  line-height: 11px;
+}
+
+.appRoot :global(.form-message) {
+  font: var(--font-size-xs) var(--font-body);
+  margin-top: var(--space-3-5);
+}
+
+.appRoot :global(.form-message.error),
+.appRoot :global(.error-state) {
+  color: var(--color-danger);
+}
+
+.appRoot :global(.empty-state.error-state) {
+  align-items: flex-start;
+  display: grid;
+  gap: var(--space-3-5);
+}
+
+.appRoot :global(.empty-state.error-state p) {
+  margin: 0;
+}
+
+.appRoot :global(.empty-state.error-state button) {
+  background: var(--color-focus-ring);
+  margin-top: 0;
+  max-width: 190px;
+  padding: var(--space-3) var(--space-4);
+}
+
+.appRoot :global(.empty-state) {
+  color: var(--color-text-secondary);
+  font: var(--font-size-sm) var(--font-body);
+  padding: var(--space-7) 0;
+}
+
+.appRoot :global(.student-row) {
+  align-items: center;
+  border-bottom: 1px solid var(--color-border-default);
+  display: flex;
+  gap: var(--space-3-5);
+  padding: var(--space-3-75) 0;
+}
+
+.appRoot :global(.student-row > div) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.appRoot :global(.student-row > .status) {
+  flex: 0 0 auto;
+}
+
+.appRoot :global(.avatar) {
+  align-items: center;
+  background: var(--color-brand);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-on-brand);
+  display: flex;
+  flex: 0 0 38px;
+  font: var(--font-size-lg) var(--font-body);
+  height: 38px;
+  justify-content: center;
+}
+
+.appRoot :global(.student-row h3) {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-regular);
+  margin: 0 0 var(--space-1);
+}
+
+.appRoot :global(.student-row p) {
+  color: var(--color-text-secondary);
+  font: var(--font-size-xs) var(--font-body);
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .appRoot :global(.student-shell) {
+    padding: var(--space-10) var(--space-5-5);
+  }
+
+  .appRoot :global(.student-grid) {
+    display: block;
+    margin-top: var(--space-12);
+  }
+
+  .appRoot :global(.student-list) {
+    margin-top: var(--space-14);
+  }
+}

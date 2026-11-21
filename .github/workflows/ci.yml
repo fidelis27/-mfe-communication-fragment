@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend-quality:
+    name: Frontend quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.0
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - run: npm run check:docs
+      - run: npm run lint
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run check:contrast
+      - run: npm run format:check
+      - run: npm audit --audit-level=high
+
+  frontend-build:
+    name: Build ${{ matrix.workspace }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        workspace:
+          - "@mfe/shared"
+          - mfe-host
+          - mfe-student
+          - mfe-institution
+          - mfe-activity
+          - mfe-dashboard
+          - mfe-admin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.0
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - run: npm run build --workspace=${{ matrix.workspace }}
+      - if: matrix.workspace != '@mfe/shared' && matrix.workspace != 'mfe-host'
+        run: npm run build:module --workspace=${{ matrix.workspace }}
+
+  e2e:
+    name: E2E modules
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.0
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - name: Upload Playwright report and traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+
+  ci:
+    name: CI gate
+    if: always()
+    needs: [frontend-quality, frontend-build, e2e]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all CI jobs to pass
+        run: |
+          if [[ "${{ needs.frontend-quality.result }}" != "success" || "${{ needs.frontend-build.result }}" != "success" || "${{ needs.e2e.result }}" != "success" ]]; then
+            echo "One or more required CI jobs failed."
+            exit 1
+          fi
+          echo "All required CI jobs passed."
