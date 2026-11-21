@@ -34,6 +34,7 @@ function createBuiltFragment(dist: string, name: string) {
   mkdirSync(path.join(dist, "modules"), { recursive: true });
   mkdirSync(path.join(dist, "server"), { recursive: true });
   writeFileSync(path.join(dist, "modules", `${name}.js`), "console.log('client');");
+  writeFileSync(path.join(dist, "modules", `${name}.css`), ".a{color:red}");
   writeFileSync(
     path.join(dist, "server", "fragment.server.js"),
     `export function createFragmentProvider({ clientScript, integrity }) {
@@ -124,6 +125,20 @@ describe.each(providers)("mfe-%s fragment handler", (name) => {
 
     const denied = await request(handler, scriptUrl, { origin: "https://evil.example.com" });
     expect(denied.status).toBe(403);
+  });
+
+  it("serves the module styles", async () => {
+    const cwd = tempDir();
+    createBuiltFragment(path.join(cwd, "dist"), name);
+
+    const response = await request(
+      await loadHandler(name, cwd, hostOrigin),
+      `/api/fragments/assets/${name}.css`,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers["content-type"]).toContain("text/css");
+    expect(response.body).toBe(".a{color:red}");
   });
 
   it("explains a missing MFE_HOST_ORIGINS instead of crashing on import", async () => {

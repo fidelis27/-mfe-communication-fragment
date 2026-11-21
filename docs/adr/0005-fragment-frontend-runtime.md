@@ -29,12 +29,14 @@ fallback yet.
   `GET /api/fragments/<name>` and the client script at
   `/api/fragments/assets/<name>.client.js`. It computes the script's SHA-384
   and sends it in `x-fragment-integrity`; script CORS is limited to
-  `MFE_HOST_ORIGINS`. It runs as a Vercel Function per provider and in the
+  `MFE_HOST_ORIGINS`. It also serves the module styles at
+  `/api/fragments/assets/<name>.css`. It runs as a Vercel Function per provider and in the
   local and E2E servers.
 - The Host gets a small server, `GET /api/fragments/:module`
   (`host/server/fragment-bff.mjs`). It calls `fetchFragment` with the configured
   provider origins as the allowlist, forwards nothing from the request, and
-  returns `{ fragment, html }` as JSON. The browser renders
+  fetches the Provider's styles from the same origin and puts them in a `<style>`
+  before the markup, then returns `{ fragment, html }` as JSON. The browser renders
   `<FragmentSlot fragment html>`, which hydrates with the Provider's React. The
   same handler runs in `vite dev`/`vite preview` and as a Vercel Function.
 - The Host shell stays client-rendered. Loading, retry fallback, error reporting
@@ -61,8 +63,10 @@ fallback yet.
 - Fragment markup is visible before it is interactive. Until the Provider
   bundle hydrates, inputs in the markup do not respond; E2E tests wait for the
   ready mark. A form submitted before hydration would submit natively.
-- Provider CSS is injected by the client bundle, so server markup is unstyled
-  until the script runs.
+- Provider styles are delivered with the fragment HTML by the Host server, so
+  the markup is styled even before (or without) the client bundle; the bundle
+  still injects the same styles when it loads. If the styles request fails, the
+  fragment is sent unstyled and the error is logged.
 - Provider failures after the shell has been sent, a failed script load and
   hydration errors are reported to Sentry but do not show the retry fallback.
 - No manifest polling: a provider update reaches the Host on the next fragment

@@ -42,13 +42,21 @@ afterEach(() => {
 
 describe("host fragment server", () => {
   it("returns fragment metadata and html fetched from the configured provider", async () => {
-    const fetchMock = vi.fn((_url: URL) => Promise.resolve(providerResponse()));
+    const fetchMock = vi.fn((url: URL) =>
+      Promise.resolve(
+        String(url).endsWith(".css")
+          ? new Response(".a{color:red}</style><b>", { headers: { "content-type": "text/css" } })
+          : providerResponse(),
+      ),
+    );
     vi.stubGlobal("fetch", fetchMock);
 
     const { status, body } = await call("/api/fragments/student");
 
     expect(status).toBe(200);
     expect(body.html).toContain("data-fragment-root");
+    expect(body.html.startsWith('<style data-module-styles="student">.a{color:red}')).toBe(true);
+    expect(body.html).not.toContain("</style><b>");
     expect(body.fragment).toEqual({
       id: "abc",
       name: "student",
@@ -59,6 +67,23 @@ describe("host fragment server", () => {
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
       "https://student.example.com/api/fragments/student",
     );
+  });
+
+  it("sends the fragment without styles when the styles request fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: URL) =>
+        Promise.resolve(
+          String(url).endsWith(".css") ? new Response("no", { status: 500 }) : providerResponse(),
+        ),
+      ),
+    );
+
+    const { status, body } = await call("/api/fragments/student");
+
+    expect(status).toBe(200);
+    expect(body.html.startsWith("<div data-fragment-root>")).toBe(true);
   });
 
   it("does not contact anything for an unknown module", async () => {

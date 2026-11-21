@@ -35,4 +35,5 @@ from defects; the library itself is not modified in this repository.
   there is no signal in the markup that it is not yet interactive. The E2E
   tests wait for the Host's ready mark.
 - **Styles:** CSS is not part of the streamed fragment, so server markup is
-  unstyled until the Provider's client bundle injects it.
+  unstyled until the Provider's client bundle injects it. The project serves
+  the styles next to the script and the Host server embeds them.
