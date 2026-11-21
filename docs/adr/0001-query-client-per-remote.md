@@ -7,7 +7,7 @@ Accepted.
 ## Context
 
 The five modules query and mutate backend resources independently while running
-in the same browser page. `@lib-core-mfe/module-frontend` bundles each module's
+in the same browser page. the fragment runtime bundles each module's
 React and dependencies independently, so the React and TanStack Query runtimes
 are not shared between modules. Sharing one cache across separately deployed
 MFEs would couple their query keys, invalidation behavior and lifecycles.

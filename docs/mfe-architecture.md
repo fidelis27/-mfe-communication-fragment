@@ -26,9 +26,8 @@ modules/frontend/packages/
 ```
 
 Each MFE owns its UI, feature API modules and TanStack Query hooks under
-`src/features/<feature>/`. Each provider also has a module entry and an IIFE
-build. The host loads these builds with `<Module>` using a manifest served by a
-Vercel Function. Each module bundles its own React and dependencies; they are
+`src/features/<feature>/`. Each provider also has a fragment client entry (IIFE) and a
+server entry (`dist/server`). The host's server fetches the rendered fragment from the provider's Vercel Function and the browser embeds it with `<FragmentSlot>`. Each module bundles its own React and dependencies; they are
 not runtime singletons. Every remote creates a separate `QueryClient`, keeping
 its cache isolated from the other MFEs.
 The host and remotes use shared UI primitives and semantic design tokens from
@@ -67,7 +66,7 @@ requests.
 
 ## Deployment
 
-The host and each MFE are deployed as separate Vercel projects, each building from its package directory. Each MFE deployment serves its module manifest and integrity-checked module assets from a Vercel Function; the host resolves provider origins from `VITE_MFE_*_URL`. Set `MFE_HOST_ORIGINS` in each provider project to the allowed Host origins. Frontend API requests use `VITE_API_URL`; authentication uses `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+The host and each MFE are deployed as separate Vercel projects, each building from its package directory. Each MFE deployment serves its rendered fragment and integrity-checked client script from a Vercel Function; the host's own Vercel Function (`/api/fragments/:module`) resolves provider origins from `VITE_MFE_*_URL`, which must be set at runtime as well as build time. Set `MFE_HOST_ORIGINS` in each provider project to the allowed Host origins. Frontend API requests use `VITE_API_URL`; authentication uses `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
 
 The backend API and its data model are maintained in the separate `secretaria-backend` repository.
 

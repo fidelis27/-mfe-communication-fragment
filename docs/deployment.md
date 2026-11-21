@@ -16,7 +16,7 @@ Render: secretaria-backend (Go)
 
 O backend vive em `fidelis27/secretaria-backend`; o Host e os MFEs estao neste
 repositorio. Cada MFE e implantado como site estatico e usa uma Vercel Function
-para servir o manifesto e os bundles do modulo por meio de `serveModules`.
+para renderizar o fragmento e servir o bundle do modulo (`/api/fragments`). O Host tambem usa uma Vercel Function (`/api/fragments/:modulo`) que busca o fragmento no provider, servidor a servidor.
 `@mfe/shared` e empacotado em cada modulo; suas copias usam o bus em
 `globalThis.__mfeBus` e a ponte global de autenticacao Supabase do Host.
 
@@ -42,16 +42,17 @@ VITE_API_URL=https://secretaria-backend.onrender.com
 ```
 
 No projeto Vercel de cada provider, defina `MFE_HOST_ORIGINS` como uma lista
-separada por virgulas das origens exatas do Host autorizadas a ler o manifesto
-e os bundles. Configure as origens de preview somente se forem necessarias;
+separada por virgulas das origens exatas do Host autorizadas a carregar o bundle do
+modulo. Configure as origens de preview somente se forem necessarias;
 nao use `*`. No Host, cada `VITE_MFE_*_URL` aponta para a origem do provider,
-sem sufixo de arquivo de entrada. O fallback SPA dos providers deve excluir
-`/api` para que o manifesto e os bundles sejam atendidos pela Vercel Function.
+sem sufixo de arquivo de entrada, e deve estar definido no projeto Vercel do Host
+tambem em tempo de execucao (a Function do Host le essas variaveis). O fallback SPA
+do Host e dos providers deve excluir `/api`.
 
-A Function procura `dist/modules` tanto a partir do Root Directory do projeto
+A Function procura `dist` (com `modules/` e `server/`) tanto a partir do Root Directory do projeto
 quanto da raiz do repositorio, porque o diretorio de trabalho na Vercel pode
 ser qualquer um dos dois. Se `MFE_HOST_ORIGINS` faltar ou for invalido, ou se
-`dist/modules` nao existir, o manifesto responde `500` com um JSON `error`
+`dist` nao existir, o fragmento responde `500` com um JSON `error`
 explicando a causa, e a mesma mensagem aparece nos logs da Function.
 
 Os projetos de producao seguem o padrao `mfe-communication-lib-<pacote>`, e o

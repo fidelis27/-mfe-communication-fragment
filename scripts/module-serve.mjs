@@ -1,36 +1,29 @@
 import { createServer } from "node:http";
 import path from "node:path";
 import process from "node:process";
-import { serveModules } from "@lib-core-mfe/module-frontend/server";
+import { createProviderHandler } from "../modules/frontend/provider-handler.mjs";
 
-const [modulesPath, appName, moduleName, portValue, ...corsOrigins] = process.argv.slice(2);
+const [distPath, appName, fragmentName, portValue, ...hostOrigins] = process.argv.slice(2);
 const port = Number(portValue);
 
-if (
-  !modulesPath ||
-  !appName ||
-  !moduleName ||
-  !Number.isInteger(port) ||
-  corsOrigins.length === 0
-) {
+if (!distPath || !appName || !fragmentName || !Number.isInteger(port) || hostOrigins.length === 0) {
   throw new Error(
-    "Usage: node scripts/module-serve.mjs <modulesPath> <appName> <moduleName> <port> <corsOrigin...>",
+    "Usage: node scripts/module-serve.mjs <distPath> <appName> <fragmentName> <port> <hostOrigin...>",
   );
 }
 
-const middleware = serveModules({
-  modulesPath: path.resolve(modulesPath),
+const handler = createProviderHandler({
   appName,
-  basePath: "/api/modules",
-  corsOrigins,
-  include: [moduleName],
+  fragmentName,
+  distRoots: [path.resolve(distPath)],
+  hostOrigins: hostOrigins.join(","),
 });
 const server = createServer((request, response) => {
-  void middleware(request, response);
+  void handler(request, response);
 });
 
 server.listen(port, "127.0.0.1", () => {
-  console.log(`${appName} module provider listening on http://127.0.0.1:${port}/api/modules`);
+  console.log(`${appName} fragment provider listening on http://127.0.0.1:${port}/api/fragments`);
 });
 
 process.on("SIGINT", () => server.close());

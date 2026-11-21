@@ -17,16 +17,32 @@ vi.mock("@mfe/shared", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@mfe/shared")>()),
   ...authMocks,
 }));
-vi.mock("@lib-core-mfe/module-frontend/client", () => ({ Module: () => null }));
+vi.mock("@lib-core-mfe/fragment-frontend/consumer", () => ({ FragmentSlot: () => null }));
 
 describe("domain event delivery across MFEs", () => {
   const fetchMock = vi.fn();
+  // Calls to the backend API only; the Host also asks its server for the remote fragment.
+  const apiCalls = () =>
+    fetchMock.mock.calls.filter(([url]) => !String(url).startsWith("/api/fragments"));
 
   beforeEach(() => {
     Reflect.deleteProperty(globalThis, "__mfeBus");
     Reflect.set(globalThis, "__mfeHostReady", true);
     fetchMock.mockReset();
-    fetchMock.mockImplementation(() => Promise.resolve(new Response(JSON.stringify([]))));
+    fetchMock.mockImplementation((url: unknown) =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify(
+            String(url).startsWith("/api/fragments")
+              ? {
+                  fragment: { id: "f1", name: "student", appName: "mfe-student", script: "" },
+                  html: "",
+                }
+              : [],
+          ),
+        ),
+      ),
+    );
     vi.stubGlobal("fetch", fetchMock);
     vi.stubEnv("VITE_SUPABASE_URL", "https://project.supabase.co");
     vi.stubEnv("VITE_SUPABASE_ANON_KEY", "public-key");
@@ -66,7 +82,7 @@ describe("domain event delivery across MFEs", () => {
     await waitFor(() => {
       expect(screen.getByText("Dados em movimento")).toBeInTheDocument();
       expect(screen.getByText("Aguardando uma alteração no sistema.")).toBeInTheDocument();
-      expect(fetchMock).toHaveBeenCalledTimes(8);
+      expect(apiCalls()).toHaveLength(8);
     });
     fetchMock.mockClear();
 
@@ -93,7 +109,7 @@ describe("domain event delivery across MFEs", () => {
       rerender(appTree());
     });
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(apiCalls()).toHaveLength(3));
     const activityFeed = screen.getByText("Eventos recentes").closest("section");
     if (!activityFeed) throw new Error("Activity feed was not rendered");
     expect(within(activityFeed).getAllByRole("article")).toHaveLength(1);

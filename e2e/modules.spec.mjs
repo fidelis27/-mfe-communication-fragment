@@ -5,6 +5,7 @@ import {
   seedAuthenticatedSession,
   studentCreatedEvent,
   studentUpdatedEvent,
+  waitForRemoteReady,
 } from "./helpers.mjs";
 
 async function setup(page, options = {}) {
@@ -20,7 +21,7 @@ async function setup(page, options = {}) {
   return { api, socket };
 }
 
-test("host loads all five real modules through manifest navigation", async ({ page }) => {
+test("host loads all five real modules through fragment navigation", async ({ page }) => {
   await setup(page);
   await page.goto("/");
   await expect(page.getByRole("navigation", { name: "Módulos da secretaria" })).toBeVisible();
@@ -46,14 +47,14 @@ test("host loads all five real modules through manifest navigation", async ({ pa
   }
 });
 
-test("activity manifest failure shows retry fallback and then loads the module", async ({
+test("activity fragment failure shows retry fallback and then loads the module", async ({
   page,
 }) => {
   await setup(page);
-  let manifestRequests = 0;
-  await page.route("http://127.0.0.1:4276/api/modules/__modules_configuration", async (route) => {
-    manifestRequests += 1;
-    if (manifestRequests === 1) {
+  let fragmentRequests = 0;
+  await page.route("**/api/fragments/activity", async (route) => {
+    fragmentRequests += 1;
+    if (fragmentRequests === 1) {
       await route.fulfill({ status: 503, body: "Temporary provider failure" });
       return;
     }
@@ -64,12 +65,13 @@ test("activity manifest failure shows retry fallback and then loads the module",
   await expect(page.getByRole("heading", { name: "Atividade indisponível" })).toBeVisible();
   await page.getByRole("button", { name: "Tentar novamente" }).click();
   await expect(page.getByRole("heading", { name: "Atividade do sistema." })).toBeVisible();
-  expect(manifestRequests).toBeGreaterThanOrEqual(2);
+  expect(fragmentRequests).toBeGreaterThanOrEqual(2);
 });
 
 test("student form creates a record through the real remote", async ({ page }) => {
   const { api } = await setup(page);
   await page.goto("/estudantes");
+  await waitForRemoteReady(page, "student");
 
   await page.getByLabel("Nome completo").fill("Ana E2E");
   await page.getByLabel("Instituição").selectOption("institution-e2e");
@@ -93,6 +95,7 @@ test("403 while creating a student is accessible and does not add the student", 
     forcedErrors: [{ method: "POST", pathname: "/students", status: 403 }],
   });
   await page.goto("/estudantes");
+  await waitForRemoteReady(page, "student");
 
   await page.getByLabel("Nome completo").fill("Cadastro negado E2E");
   await page.getByLabel("Instituição").selectOption("institution-e2e");
@@ -163,9 +166,7 @@ test("WebSocket event appears in Activity and refreshes Dashboard", async ({ pag
 
 test("failed module shows fallback and offers retry", async ({ page }) => {
   await setup(page);
-  await page.route("http://127.0.0.1:4279/api/modules/__modules_configuration", (route) =>
-    route.abort(),
-  );
+  await page.route("**/api/fragments/admin", (route) => route.abort());
   await page.goto("/");
   await page.getByRole("link", { name: /Admin/ }).click();
 

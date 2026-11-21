@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => {
       target: "esnext",
       outDir: "dist/modules",
       lib: {
-        entry: "src/module.tsx",
+        entry: "src/fragment.client.tsx",
         name: "ActivityModule",
         formats: ["iife"],
         fileName: () => "activity.js",

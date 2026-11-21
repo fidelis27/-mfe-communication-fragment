@@ -1,8 +1,8 @@
 {
   "buildCommand": "npm run build && npm run build:module --ignore-scripts",
   "functions": {
-    "api/modules/[...path].ts": {
-      "includeFiles": "dist/modules/**"
+    "api/fragments/[...path].ts": {
+      "includeFiles": "dist/**"
     }
   },
   "rewrites": [{ "source": "/((?!api).*)", "destination": "/index.html" }]
